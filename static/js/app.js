@@ -1,7 +1,7 @@
 // 1. Use the D3 library to read in samples.json from the URL 
 
 // Link to data file 
-const url = 'data/samples.json';
+const url = 'https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json';
 
 // Grab a reference to the dropdown select element
 function init() {
@@ -29,11 +29,7 @@ function init() {
 // Initialize the dashboard
 init();
 
-// Fetch new data each time a new sample is selected
-function newchoice(sample_i) {
-  makedata(sample_i);
-  makechart(sample_i);
-}
+
 
 // 2. Create a horizontal bar chart with a dropdown menu to display the top 10 OTUs found in that individual.
 
@@ -116,4 +112,36 @@ function makechart(sample) {
     Plotly.newPlot('bubble', bubble_data, bubble_layout);
     
   });
+}
+
+// 4. Display the sample metadata, i.e., an individual's demographic information.
+
+
+// Demographics Panel 
+function makedata(sample) {
+  d3.json(url).then((data) => {
+    var metadata = data.metadata;
+    // Filter the data for the object with the desired sample number
+    var results = metadata.filter(sample_i => sample_i.id == sample);
+    var result = results[0];
+    // Use d3 to select the panel with id of `#sample-metadata`
+    var panel = d3.select("#sample-metadata");
+
+    // Use `.html("") to clear any existing metadata
+    panel.html("");
+
+// 5. Display each key-value pair from the metadata JSON object somewhere on the page.
+
+    Object.entries(result).forEach(([id, val]) => {
+      panel.append("h6").text(id.toUpperCase() + ': ' + val);
+    });
+  });
+}
+
+// 6. Update all the plots when a new sample is selected.
+
+// Fetch new data each time a new sample is selected
+function newchoice(sample_i) {
+  makedata(sample_i);
+  makechart(sample_i);
 }
