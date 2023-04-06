@@ -3,10 +3,9 @@
 // Link to data file 
 const url = 'data/samples.json';
 
-function init() {
-
 // Grab a reference to the dropdown select element
-  var selector = d3.select("#selDataset");
+function init() {
+  var selector = d3.select("#select-data");
 
 // Use the list of sample names to populate the select options
   d3.json(url).then((data) => {
@@ -23,7 +22,7 @@ function init() {
     var sample_1 = names[0];
     console.log(sample_1);
     makechart(sample_1);
-    getdata(sample_1);
+    makedata(sample_1);
   });
 }
 
@@ -32,7 +31,7 @@ init();
 
 // Fetch new data each time a new sample is selected
 function newchoice(sample_i) {
-  getdata(sample_i);
+  makedata(sample_i);
   makechart(sample_i);
 }
 
@@ -51,7 +50,7 @@ function makechart(sample) {
     let otu_label = sample_1.otu_labels;
     let s_values = sample_1.sample_values;
 
-    // Create the yticks for the bar chart.
+    // Create the yticks for the bar chart using otu_ids.
 
     let top_10 = 10; 
 
@@ -62,12 +61,14 @@ function makechart(sample) {
       .reverse()
       );
 
+    // Use otu_labels for top 10 for hovertext
     top_labels = (
       otu_label
       .slice(0, top_10)
       .map(val => val)
       .reverse());
 
+      // Use sample_values from top ten as values
     top_values = (
       s_values
       .slice(0, top_10)
@@ -76,9 +77,9 @@ function makechart(sample) {
 
     // Create the trace for the bar chart. 
     var bar_data = [{
-      x: top_values,
+      x: top_values, 
       y: yticks,
-      text: top_labels,
+      text: top_labels, 
       type: 'bar',
       orientation: 'h'
     }];
@@ -91,6 +92,28 @@ function makechart(sample) {
 
     // Use Plotly to plot the data with the layout. 
     Plotly.newPlot('bar', bar_data, bar_layout);
+
+    // 3. Create a bubble chart that displays each sample.
+
+    // Create trace for bubble chart.
+    var bubble_data = [{
+      x: otu_ID, // Use otu_ids for the x values.
+      y: s_values, // Use sample_values for the y values.
+      text: otu_label, // Use otu_labels for the text values.
+      mode: 'markers',
+      marker: { 
+        size: s_values, //Use sample_values for the marker size.
+        color: otu_ID, // Use otu_ids for the marker colors.
+        colorscale: 'Portland' }
+    }];
+    // Create layout for bubble chart.
+    var bubble_layout = {
+      hovermode: 'closest',
+      title: '<b>Bacteria Cultures per Sample</b>',
+      xaxis: { title: 'OTU ID' }
+    };
+    // Use Plotly to plot the data with the layout.
+    Plotly.newPlot('bubble', bubble_data, bubble_layout);
     
   });
 }
